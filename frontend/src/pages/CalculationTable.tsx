@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { anticrisis, type PeriodTableData } from '../api'
 
+/** Данные таблицы периода, включая опциональную фин.модель (расчёт по данным периода) */
+type TableData = PeriodTableData & { fin_model?: Record<string, number> }
+
 const balanceLabels: Record<string, string> = {
   noncurrent_assets: 'Внеоборотные активы',
   current_assets: 'Оборотные активы',
@@ -88,7 +91,7 @@ export default function CalculationTable() {
   const org = orgId ? parseInt(orgId, 10) : 0
   const [periods, setPeriods] = useState<{ id: number; label: string }[]>([])
   const [periodId, setPeriodId] = useState<number | null>(null)
-  const [data, setData] = useState<PeriodTableData | null>(null)
+  const [data, setData] = useState<TableData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
