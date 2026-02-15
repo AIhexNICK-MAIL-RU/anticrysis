@@ -21,7 +21,8 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     const err = await res.json().catch(() => ({ detail: res.statusText }));
     throw new Error(err.detail || String(err));
   }
-  return res.headers.get('content-type')?.includes('json') ? res.json() : res.text();
+  const result = res.headers.get('content-type')?.includes('json') ? await res.json() : await res.text();
+  return result as T;
 }
 
 export const auth = {
