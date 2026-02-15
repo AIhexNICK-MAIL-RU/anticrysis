@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { anticrisis } from '../api'
+import { anticrisis, type PeriodTableData } from '../api'
 
 const balanceLabels: Record<string, string> = {
   noncurrent_assets: 'Внеоборотные активы',
@@ -88,15 +88,7 @@ export default function CalculationTable() {
   const org = orgId ? parseInt(orgId, 10) : 0
   const [periods, setPeriods] = useState<{ id: number; label: string }[]>([])
   const [periodId, setPeriodId] = useState<number | null>(null)
-  const [data, setData] = useState<{
-    period: { id: number; label: string }
-    balance: Record<string, number>
-    bdr: Record<string, number>
-    bdds: Record<string, number>
-    coefficients: Record<string, number>
-    crisis: { crisis_type_name: string; confidence: number; reasoning: string }
-    fin_model?: Record<string, number>
-  } | null>(null)
+  const [data, setData] = useState<PeriodTableData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -177,7 +169,7 @@ export default function CalculationTable() {
           {data.fin_model && (
             <TableBlock
               title="Финансовая модель (расчёт по данным периода)"
-              rows={Object.entries(data.fin_model).map(([k, v]) => [finModelLabels[k] ?? k, Number(v)])}
+              rows={Object.entries(data.fin_model).map(([k, v]) => [finModelLabels[k] ?? k, Number(v)] as [string, number])}
             />
           )}
           <div className="card">

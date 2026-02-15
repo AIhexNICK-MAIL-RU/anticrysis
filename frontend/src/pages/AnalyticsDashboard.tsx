@@ -217,7 +217,7 @@ export default function AnalyticsDashboard() {
               <BarChart data={balanceChartData} margin={{ top: 8, right: 8, left: 8, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" angle={-25} textAnchor="end" height={60} tick={{ fontSize: 11 }} />
-                <YAxis tickFormatter={(v) => formatNum(v)} />
+                <YAxis tickFormatter={(v: number) => formatNum(v)} />
                 <Tooltip formatter={(v: number) => formatNum(v)} />
                 <Bar dataKey="value" fill={CHART_COLORS[0]} name="Сумма" />
               </BarChart>
@@ -230,7 +230,7 @@ export default function AnalyticsDashboard() {
               <BarChart data={bdrChartData} margin={{ top: 8, right: 8, left: 8, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" angle={-25} textAnchor="end" height={60} tick={{ fontSize: 11 }} />
-                <YAxis tickFormatter={(v) => formatNum(v)} />
+                <YAxis tickFormatter={(v: number) => formatNum(v)} />
                 <Tooltip formatter={(v: number) => formatNum(v)} />
                 <Bar dataKey="value" fill={CHART_COLORS[1]} name="Сумма" />
               </BarChart>
@@ -244,7 +244,7 @@ export default function AnalyticsDashboard() {
                 <BarChart data={bddsChartData} margin={{ top: 8, right: 8, left: 8, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" angle={-25} textAnchor="end" height={60} tick={{ fontSize: 11 }} />
-                  <YAxis tickFormatter={(v) => formatNum(v)} />
+                  <YAxis tickFormatter={(v: number) => formatNum(v)} />
                   <Tooltip formatter={(v: number) => formatNum(v)} />
                   <Bar dataKey="value" fill={CHART_COLORS[2]} name="Сумма" />
                 </BarChart>
@@ -257,7 +257,7 @@ export default function AnalyticsDashboard() {
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={coefChartData} layout="vertical" margin={{ top: 8, right: 40, left: 120, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" tickFormatter={(v) => Number(v).toFixed(2)} />
+                <XAxis type="number" tickFormatter={(v: number) => Number(v).toFixed(2)} />
                 <YAxis type="category" dataKey="name" width={115} tick={{ fontSize: 11 }} />
                 <Tooltip formatter={(v: number) => Number(v).toFixed(4)} />
                 <Bar dataKey="value" fill={CHART_COLORS[3]} name="Значение" />
@@ -271,7 +271,7 @@ export default function AnalyticsDashboard() {
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={finModelChartData} layout="vertical" margin={{ top: 8, right: 40, left: 140, bottom: 8 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" tickFormatter={(v) => formatNum(v)} />
+                  <XAxis type="number" tickFormatter={(v: number) => formatNum(v)} />
                   <YAxis type="category" dataKey="name" width={135} tick={{ fontSize: 10 }} />
                   <Tooltip formatter={(v: number) => formatNum(Number(v))} />
                   <Bar dataKey="value" fill={CHART_COLORS[5]} name="Значение" />
@@ -292,7 +292,7 @@ export default function AnalyticsDashboard() {
                     cx="50%"
                     cy="50%"
                     outerRadius={70}
-                    label={({ name, value }) => `${name}: ${value}%`}
+                    label={({ name, value }: { name: string; value: number }) => `${name}: ${value}%`}
                   >
                     {crisisPieData.map((_, i) => (
                       <Cell key={i} fill={i === 0 ? CHART_COLORS[4] : '#e5e7eb'} />

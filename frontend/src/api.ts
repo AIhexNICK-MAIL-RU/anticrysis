@@ -1,5 +1,15 @@
 const BASE = '/api';
 
+export type PeriodTableData = {
+  period: { id: number; label: string; period_start?: string; period_end?: string };
+  balance: Record<string, number>;
+  bdr: Record<string, number>;
+  bdds: Record<string, number>;
+  coefficients: Record<string, number>;
+  crisis: { crisis_type_code: string; crisis_type_name: string; confidence: number; reasoning: string };
+  fin_model?: Record<string, number>;
+};
+
 function getToken(): string | null {
   return localStorage.getItem('token');
 }
@@ -67,15 +77,7 @@ export const anticrisis = {
   coefficients: (orgId: number, periodId: number) =>
     api<Record<string, number>>(`/orgs/${orgId}/anticrisis/periods/${periodId}/coefficients`),
   periodTable: (orgId: number, periodId: number) =>
-    api<{
-      period: { id: number; label: string; period_start: string; period_end: string };
-      balance: Record<string, number>;
-      bdr: Record<string, number>;
-      bdds: Record<string, number>;
-      coefficients: Record<string, number>;
-      crisis: { crisis_type_code: string; crisis_type_name: string; confidence: number; reasoning: string };
-      fin_model?: Record<string, number>;
-    }>(`/orgs/${orgId}/anticrisis/periods/${periodId}/table`),
+    api<PeriodTableData>(`/orgs/${orgId}/anticrisis/periods/${periodId}/table`),
   crisis: (orgId: number, periodId: number) =>
     api<{ crisis_type_code: string; crisis_type_name: string; confidence: number; reasoning: string }>(
       `/orgs/${orgId}/anticrisis/periods/${periodId}/crisis`
