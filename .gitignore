@@ -1,4 +1,4 @@
-# Презентации и рабочие тетради
+# Презентации и рабочие тетради (не в публичный репо)
 *.pdf
 *.pptx
 *.ppt
@@ -7,6 +7,28 @@
 *.ipynb
 *.doc
 *.docx
+
+# Файл с промптом и прочие внутренние материалы
+*ПРОМПТ*
+*промпт*
+ПРОМПТ_для_составления_ТЗ_веб-сервиса.md
+заметки/
+черновики/
+*.draft.md
+
+# Секреты и конфиги (не для публичного репо)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+.secret
+*.secret
+config.local.*
+local.yml
+local.yaml
+credentials*
 
 # Python
 __pycache__/
@@ -17,11 +39,13 @@ __pycache__/
 venv/
 .venv/
 env/
-.env
-.env.local
 *.db
 *.sqlite
 *.sqlite3
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
 # Node
 node_modules/
