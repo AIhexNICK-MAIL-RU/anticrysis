@@ -16,7 +16,8 @@ export default function Login() {
       localStorage.setItem('token', access_token)
       navigate('/')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка входа')
+      const msg = err instanceof Error ? err.message : typeof err === 'object' && err !== null ? JSON.stringify(err) : 'Ошибка входа'
+      setError(msg)
     }
   }
 

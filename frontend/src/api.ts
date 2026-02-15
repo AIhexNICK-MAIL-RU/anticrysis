@@ -19,7 +19,16 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(err.detail || String(err));
+    const msg = err?.detail;
+    const str =
+      typeof msg === 'string'
+        ? msg
+        : Array.isArray(msg)
+          ? msg.map((e: { msg?: string }) => e?.msg || JSON.stringify(e)).join(', ')
+          : msg != null
+            ? JSON.stringify(msg)
+            : res.statusText || 'Ошибка запроса';
+    throw new Error(str);
   }
   const result = res.headers.get('content-type')?.includes('json') ? await res.json() : await res.text();
   return result as T;
