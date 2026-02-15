@@ -73,7 +73,7 @@ async def list_periods(
     return list(result.scalars().all())
 
 
-def _recalc_coefficients(db: AsyncSession, period_id: int, balance: Balance, bdr: BDR):
+async def _recalc_coefficients(db: AsyncSession, period_id: int, balance: Balance, bdr: BDR):
     coefs = calculate_coefficients(
         noncurrent_assets=balance.noncurrent_assets,
         current_assets=balance.current_assets,
