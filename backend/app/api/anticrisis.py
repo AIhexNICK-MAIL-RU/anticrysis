@@ -23,6 +23,7 @@ from app.schemas.anticrisis import (
     BDDSCreate,
     CoefficientsResponse,
     CrisisClassification,
+    PeriodTableResponse,
     PlanCreate,
     PlanResponse,
     PlanItemResponse,
@@ -213,6 +214,101 @@ async def update_bdds(
         setattr(bdds, k, v)
     await db.refresh(bdds)
     return {"ok": True}
+
+
+@router.get("/periods/{period_id}/table", response_model=PeriodTableResponse)
+async def get_period_table(
+    org_id: int,
+    period_id: int,
+    db: AsyncSession = Depends(get_db),
+    membership: UserOrganization = Depends(get_organization_membership),
+):
+    """Данные для расчётной таблицы: баланс, БДР, БДДС, коэффициенты, карта кризиса."""
+    result = await db.execute(
+        select(Period).where(Period.id == period_id, Period.organization_id == org_id)
+    )
+    period = result.scalar_one_or_none()
+    if not period:
+        raise HTTPException(404, "Период не найден")
+    result = await db.execute(select(Balance).where(Balance.period_id == period_id))
+    balance = result.scalar_one_or_none()
+    result = await db.execute(select(BDR).where(BDR.period_id == period_id))
+    bdr = result.scalar_one_or_none()
+    result = await db.execute(select(BDDS).where(BDDS.period_id == period_id))
+    bdds = result.scalar_one_or_none()
+    if not balance or not bdr:
+        raise HTTPException(404, "Введите данные баланса и БДР в разделе «Отчётность»")
+    coefs = calculate_coefficients(
+        balance.noncurrent_assets, balance.current_assets, balance.equity,
+        balance.long_term_liabilities, balance.short_term_liabilities,
+        balance.receivables, balance.payables, balance.cash,
+        bdr.revenue, bdr.cost_of_sales, bdr.operating_expenses, bdr.other_income, bdr.other_expenses,
+    )
+    result = await db.execute(select(Coefficients).where(Coefficients.period_id == period_id))
+    coef_row = result.scalar_one_or_none()
+    if coef_row:
+        code, confidence, reasoning = classify_crisis(
+            current_ratio=coef_row.current_ratio,
+            quick_ratio=coef_row.quick_ratio,
+            absolute_liquidity=coef_row.absolute_liquidity,
+            autonomy=coef_row.autonomy,
+            profit_margin=coef_row.profit_margin,
+            cash=balance.cash,
+            short_term_liabilities=balance.short_term_liabilities,
+        )
+    else:
+        code, confidence, reasoning = classify_crisis(
+            current_ratio=coefs["current_ratio"],
+            quick_ratio=coefs["quick_ratio"],
+            absolute_liquidity=coefs["absolute_liquidity"],
+            autonomy=coefs["autonomy"],
+            profit_margin=coefs["profit_margin"],
+            cash=balance.cash,
+            short_term_liabilities=balance.short_term_liabilities,
+        )
+    balance_dict = {
+        "noncurrent_assets": balance.noncurrent_assets,
+        "current_assets": balance.current_assets,
+        "equity": balance.equity,
+        "long_term_liabilities": balance.long_term_liabilities,
+        "short_term_liabilities": balance.short_term_liabilities,
+        "receivables": balance.receivables,
+        "payables": balance.payables,
+        "cash": balance.cash,
+    }
+    bdr_dict = {
+        "revenue": bdr.revenue,
+        "cost_of_sales": bdr.cost_of_sales,
+        "operating_expenses": bdr.operating_expenses,
+        "other_income": bdr.other_income,
+        "other_expenses": bdr.other_expenses,
+        "profit": bdr.revenue - bdr.cost_of_sales - bdr.operating_expenses + bdr.other_income - bdr.other_expenses,
+    }
+    bdds_dict = {}
+    if bdds:
+        bdds_dict = {
+            "cash_begin": bdds.cash_begin,
+            "inflows_operating": bdds.inflows_operating,
+            "outflows_operating": bdds.outflows_operating,
+            "inflows_investing": bdds.inflows_investing,
+            "outflows_investing": bdds.outflows_investing,
+            "inflows_financing": bdds.inflows_financing,
+            "outflows_financing": bdds.outflows_financing,
+            "cash_end": bdds.cash_end,
+        }
+    return PeriodTableResponse(
+        period=PeriodResponse.model_validate(period),
+        balance=balance_dict,
+        bdr=bdr_dict,
+        bdds=bdds_dict,
+        coefficients=CoefficientsResponse(**coefs),
+        crisis=CrisisClassification(
+            crisis_type_code=code,
+            crisis_type_name=CRISIS_TYPES.get(code, code),
+            confidence=confidence,
+            reasoning=reasoning,
+        ),
+    )
 
 
 @router.get("/periods/{period_id}/coefficients", response_model=CoefficientsResponse)

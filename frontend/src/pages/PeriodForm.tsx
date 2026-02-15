@@ -113,7 +113,7 @@ export default function PeriodForm() {
 
   return (
     <div>
-      <p><Link to="/">← Дашборд</Link></p>
+      <p><Link to="/">← Дашборд</Link> · <Link to={`/orgs/${org}/table`}>Расчётная таблица</Link></p>
       <h1>Отчётность и коэффициенты</h1>
 
       <div className="card">

@@ -70,6 +70,16 @@ class CrisisClassification(BaseModel):
     reasoning: str
 
 
+class PeriodTableResponse(BaseModel):
+    """Данные для расчётной таблицы по периоду: баланс, БДР, БДДС, коэффициенты, кризис."""
+    period: PeriodResponse
+    balance: dict  # ББЛ
+    bdr: dict
+    bdds: dict
+    coefficients: CoefficientsResponse
+    crisis: CrisisClassification
+
+
 class PlanItemCreate(BaseModel):
     title: str
     stage: str = ""

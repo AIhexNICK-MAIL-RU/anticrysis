@@ -57,6 +57,15 @@ export const anticrisis = {
     api(`/orgs/${orgId}/anticrisis/periods/${periodId}/bdds`, { method: 'PUT', body: JSON.stringify(data) }),
   coefficients: (orgId: number, periodId: number) =>
     api<Record<string, number>>(`/orgs/${orgId}/anticrisis/periods/${periodId}/coefficients`),
+  periodTable: (orgId: number, periodId: number) =>
+    api<{
+      period: { id: number; label: string; period_start: string; period_end: string };
+      balance: Record<string, number>;
+      bdr: Record<string, number>;
+      bdds: Record<string, number>;
+      coefficients: Record<string, number>;
+      crisis: { crisis_type_code: string; crisis_type_name: string; confidence: number; reasoning: string };
+    }>(`/orgs/${orgId}/anticrisis/periods/${periodId}/table`),
   crisis: (orgId: number, periodId: number) =>
     api<{ crisis_type_code: string; crisis_type_name: string; confidence: number; reasoning: string }>(
       `/orgs/${orgId}/anticrisis/periods/${periodId}/crisis`

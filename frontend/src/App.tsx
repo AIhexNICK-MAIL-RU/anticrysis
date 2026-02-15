@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import Organizations from './pages/Organizations'
 import PeriodForm from './pages/PeriodForm'
 import Plans from './pages/Plans'
+import CalculationTable from './pages/CalculationTable'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="orgs" element={<Organizations />} />
         <Route path="orgs/:orgId/periods" element={<PeriodForm />} />
         <Route path="orgs/:orgId/periods/:periodId" element={<PeriodForm />} />
+        <Route path="orgs/:orgId/table" element={<CalculationTable />} />
         <Route path="orgs/:orgId/plans" element={<Plans />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

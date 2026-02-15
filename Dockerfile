@@ -11,7 +11,8 @@ RUN npm run build
 FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends nginx \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default 2>/dev/null; true
 
 WORKDIR /app
 
@@ -20,10 +21,11 @@ COPY backend/requirements.txt ./backend/
 RUN pip install --no-cache-dir -r backend/requirements.txt
 COPY backend/ ./backend/
 
-# Статика фронтенда из stage 1
+# Статика фронтенда (убираем дефолтную страницу nginx, если есть)
+RUN rm -rf /usr/share/nginx/html/* 2>/dev/null; true
 COPY --from=frontend-builder /app/dist /usr/share/nginx/html
 
-# Nginx: раздаёт статику и проксирует /api на бэкенд
+# Nginx: только наш виртуальный хост, без дефолтного "Welcome to nginx"
 RUN echo 'server { \
     listen 80; \
     root /usr/share/nginx/html; \

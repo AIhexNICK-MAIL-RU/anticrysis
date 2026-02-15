@@ -50,6 +50,8 @@ export default function Dashboard() {
           <p>
             <Link to={`/orgs/${selectedOrgId}/periods`}>Отчётность и коэффициенты</Link>
             {' · '}
+            <Link to={`/orgs/${selectedOrgId}/table`}>Расчётная таблица</Link>
+            {' · '}
             <Link to={`/orgs/${selectedOrgId}/plans`}>Планы мероприятий</Link>
           </p>
         )}
