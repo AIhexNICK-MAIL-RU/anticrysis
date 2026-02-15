@@ -95,6 +95,7 @@ export default function CalculationTable() {
     bdds: Record<string, number>
     coefficients: Record<string, number>
     crisis: { crisis_type_name: string; confidence: number; reasoning: string }
+    fin_model?: Record<string, number>
   } | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -176,7 +177,7 @@ export default function CalculationTable() {
           {data.fin_model && (
             <TableBlock
               title="Финансовая модель (расчёт по данным периода)"
-              rows={Object.entries(data.fin_model).map(([k, v]) => [finModelLabels[k] ?? k, v])}
+              rows={Object.entries(data.fin_model).map(([k, v]) => [finModelLabels[k] ?? k, Number(v)])}
             />
           )}
           <div className="card">
