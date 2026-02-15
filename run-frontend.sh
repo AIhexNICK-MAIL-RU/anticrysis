@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
-cd "$(dirname "$0")/frontend"
-npm run dev
+# Запуск фронтенда из корня (единое окружение, workspaces).
+cd "$(dirname "$0")"
+npm run dev:frontend

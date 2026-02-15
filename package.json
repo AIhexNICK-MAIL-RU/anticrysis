@@ -1,0 +1,11 @@
+{
+  "name": "anticrisis",
+  "private": true,
+  "description": "Веб-сервис Антикризисное управление — зависимости в корне",
+  "workspaces": ["frontend"],
+  "scripts": {
+    "install:all": "npm install && pip install -r backend/requirements.txt || true",
+    "dev:frontend": "npm run dev -w anticrisis-frontend",
+    "build:frontend": "npm run build -w anticrisis-frontend"
+  }
+}

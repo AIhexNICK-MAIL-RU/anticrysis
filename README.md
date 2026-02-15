@@ -11,6 +11,53 @@
 - **ТЗ_веб-сервис_антикризисное_управление.md** — техническое задание.
 - **ПРОМПТ_для_составления_ТЗ_веб-сервиса.md** — промпт для ТЗ.
 
+## Единое окружение (одна папка — корень проекта)
+
+Все зависимости собраны в корне проекта: Python — в `.venv/`, Node — в `node_modules/` (через npm workspaces). Активация одной командой.
+
+### Одна команда активации (macOS / Linux)
+
+Из корня проекта:
+
+```bash
+source activate.sh
+```
+
+или
+
+```bash
+. activate.sh
+```
+
+Скрипт при первом запуске создаёт `.venv`, ставит зависимости бэкенда (`backend/requirements.txt`), активирует окружение и выставляет `PYTHONPATH` для запуска бэкенда из корня.
+
+### Ручная настройка (если не используете activate.sh)
+
+**1. Виртуальное окружение Python (в корне):**
+
+```bash
+# из корня проекта (2_feb)
+uv venv --python 3.12
+source .venv/bin/activate
+uv pip install -r backend/requirements.txt
+```
+
+**2. Зависимости фронтенда (из корня):**
+
+```bash
+npm install
+```
+
+Устанавливаются в `frontend/node_modules/` (workspace). Окружение готово.
+
+**Активация в следующий раз** — только активировать venv:
+
+- **macOS / Linux:** `source .venv/bin/activate`
+- **Windows (cmd):** `.venv\Scripts\activate.bat`
+- **Windows (PowerShell):** `.venv\Scripts\Activate.ps1`
+
+Деактивация: `deactivate`.
+
 ## Запуск
 
 ### Вариант A: Docker (рекомендуется)
@@ -27,32 +74,29 @@ docker compose up --build
 
 Данные БД сохраняются в volume `backend_data`.
 
-### Вариант B: Локально (с uv)
+### Вариант B: Локально (единое окружение в корне)
 
-#### 1. Бэкенд
+После активации окружения одной командой (`source activate.sh`) и установки фронта (`npm install`):
 
-```bash
-cd backend
-uv venv --python 3.12
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-uv pip install -r requirements.txt
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-Или из каталога `backend` без активации: `uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`
-
-API: http://127.0.0.1:8000  
-Документация: http://127.0.0.1:8000/docs  
-
-### 2. Фронтенд
+**Бэкенд** (из корня):
 
 ```bash
-cd frontend
-npm install
-npm run dev
+./run-backend.sh
 ```
 
-Откройте http://localhost:5173  
+или с уже активированным `.venv`: `PYTHONPATH=backend uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`
+
+**Фронтенд** (из корня):
+
+```bash
+npm run dev:frontend
+```
+
+или `./run-frontend.sh`
+
+- API: http://127.0.0.1:8000  
+- Документация: http://127.0.0.1:8000/docs  
+- Фронтенд: http://localhost:5173  
 
 Фронтенд ходит на бэкенд через прокси `/api` → `http://127.0.0.1:8000` (настроено в `frontend/vite.config.ts`).
 
@@ -74,7 +118,7 @@ npm run dev
 
 Все файлы проекта лежат только в этой папке.
 
-## Git
+## Git: как залить проект в репозиторий
 
 Репозиторий инициализирован в этой папке. В `.gitignore` добавлены:
 
@@ -82,10 +126,40 @@ npm run dev
 - **Среда и артефакты:** `venv/`, `node_modules/`, `__pycache__/`, `dist/`, `*.db`, `.env`
 - **IDE и OS:** `.idea/`, `.vscode/`, `.DS_Store`
 
-Первый коммит:
+### Первый коммит и пуш в GitHub
+
+1. Добавить файлы и сделать коммит:
 
 ```bash
 git add .
-git status   # проверьте, что в индекс не попали .pdf и т.п.
-git commit -m "Initial: веб-сервис антикризисное управление, Docker, ТЗ"
+git status   # проверьте, что в индекс не попали .pdf, .xlsx и т.п.
+git commit -m "Initial: веб-сервис антикризисное управление, Docker"
+```
+
+2. Связать проект с удалённым репозиторием (если ещё не добавлен remote):
+
+```bash
+git remote add origin https://github.com/AIhexNICK-MAIL-RU/anticrysis.git
+```
+
+Если `origin` уже есть с другим URL — заменить:  
+`git remote set-url origin https://github.com/AIhexNICK-MAIL-RU/anticrysis.git`
+
+3. Загрузить код в GitHub:
+
+```bash
+git push -u origin master
+```
+
+Git запросит логин и пароль (или токен). Если в репозитории на GitHub уже есть другие коммиты и push отклонится — выполнить:
+
+```bash
+git push -u origin master --force-with-lease
+```
+
+Для работы по SSH:
+
+```bash
+git remote set-url origin git@github.com:AIhexNICK-MAIL-RU/anticrysis.git
+git push -u origin master
 ```
