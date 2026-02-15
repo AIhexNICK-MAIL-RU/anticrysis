@@ -1,0 +1,21 @@
+services:
+  backend:
+    build: ./backend
+    container_name: anticrisis-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend_data:/app/data
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./data/anticrisis.db
+
+  frontend:
+    build: ./frontend
+    container_name: anticrisis-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  backend_data:
