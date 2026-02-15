@@ -24,6 +24,7 @@ from app.schemas.anticrisis import (
     CoefficientsResponse,
     CrisisClassification,
     PeriodTableResponse,
+    FinModelResponse,
     PlanCreate,
     PlanResponse,
     PlanItemResponse,
@@ -31,6 +32,7 @@ from app.schemas.anticrisis import (
 )
 from app.services.coefficients import calculate_coefficients
 from app.services.crisis_classifier import classify_crisis, CRISIS_TYPES
+from app.services.fin_model import run_fin_model
 from app.api.deps import get_current_user, get_organization_membership
 
 router = APIRouter(prefix="/orgs/{org_id}/anticrisis", tags=["anticrisis"])
@@ -296,6 +298,7 @@ async def get_period_table(
             "outflows_financing": bdds.outflows_financing,
             "cash_end": bdds.cash_end,
         }
+    fin = run_fin_model(balance_dict, bdr_dict, bdds_dict or {})
     return PeriodTableResponse(
         period=PeriodResponse.model_validate(period),
         balance=balance_dict,
@@ -308,6 +311,7 @@ async def get_period_table(
             confidence=confidence,
             reasoning=reasoning,
         ),
+        fin_model=FinModelResponse(**fin),
     )
 
 
@@ -328,6 +332,37 @@ async def get_coefficients(
     if not coef:
         raise HTTPException(404, "Коэффициенты не рассчитаны")
     return coef
+
+
+@router.get("/periods/{period_id}/fin-model")
+async def get_period_fin_model(
+    org_id: int,
+    period_id: int,
+    db: AsyncSession = Depends(get_db),
+    membership: UserOrganization = Depends(get_organization_membership),
+):
+    """Результаты финансовой модели по данным периода (баланс, БДР, БДДС)."""
+    result = await db.execute(
+        select(Period).where(Period.id == period_id, Period.organization_id == org_id)
+    )
+    period = result.scalar_one_or_none()
+    if not period:
+        raise HTTPException(404, "Период не найден")
+    result = await db.execute(select(Balance).where(Balance.period_id == period_id))
+    balance = result.scalar_one_or_none()
+    result = await db.execute(select(BDR).where(BDR.period_id == period_id))
+    bdr = result.scalar_one_or_none()
+    result = await db.execute(select(BDDS).where(BDDS.period_id == period_id))
+    bdds = result.scalar_one_or_none()
+    if not balance or not bdr:
+        raise HTTPException(404, "Введите данные баланса и БДР в разделе «Отчётность»")
+    balance_dict = {k: getattr(balance, k, 0) for k in ["noncurrent_assets", "current_assets", "equity", "long_term_liabilities", "short_term_liabilities", "receivables", "payables", "cash"]}
+    bdr_dict = {k: getattr(bdr, k, 0) for k in ["revenue", "cost_of_sales", "operating_expenses", "other_income", "other_expenses"]}
+    bdds_dict = {}
+    if bdds:
+        bdds_dict = {k: getattr(bdds, k, 0) for k in ["cash_begin", "inflows_operating", "outflows_operating", "inflows_investing", "outflows_investing", "inflows_financing", "outflows_financing", "cash_end"]}
+    fin = run_fin_model(balance_dict, bdr_dict, bdds_dict)
+    return {"period_id": period.id, "period_label": period.label or "", "fin_model": FinModelResponse(**fin)}
 
 
 @router.get("/periods/{period_id}/crisis", response_model=CrisisClassification)

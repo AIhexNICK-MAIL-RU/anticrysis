@@ -44,6 +44,22 @@ const coefLabels: Record<string, string> = {
   profit_margin: 'Рентабельность продаж',
 }
 
+const finModelLabels: Record<string, string> = {
+  total_assets: 'Всего активов',
+  total_liabilities: 'Всего обязательств',
+  equity_ratio: 'Доля собственного капитала',
+  profit: 'Прибыль',
+  profit_margin: 'Рентабельность продаж',
+  gross_profit: 'Валовая прибыль',
+  gross_margin: 'Валовая маржа',
+  break_even_revenue: 'Выручка ТБУ',
+  operating_cash_flow: 'Денежный поток (операционный)',
+  investing_cash_flow: 'Денежный поток (инвестиционный)',
+  financing_cash_flow: 'Денежный поток (финансовый)',
+  net_cash_flow: 'Чистое изменение денег',
+  cash_end_calculated: 'Остаток на конец (расчётный)',
+}
+
 function formatNum(v: number): string {
   if (v === undefined || v === null) return '—'
   return Number(v).toLocaleString('ru', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
@@ -128,6 +144,8 @@ export default function CalculationTable() {
         <p>
           <Link to={`/orgs/${org}/periods`}>Ввод данных (баланс, БДР, БДДС)</Link>
           {' · '}
+          <Link to={`/orgs/${org}/analytics`}>Дашборд аналитики</Link>
+          {' · '}
           <Link to={`/orgs/${org}/plans`}>Планы мероприятий</Link>
         </p>
       </div>
@@ -155,6 +173,12 @@ export default function CalculationTable() {
             title="Коэффициенты"
             rows={Object.entries(data.coefficients).map(([k, v]) => [coefLabels[k] ?? k, v])}
           />
+          {data.fin_model && (
+            <TableBlock
+              title="Финансовая модель (расчёт по данным периода)"
+              rows={Object.entries(data.fin_model).map(([k, v]) => [finModelLabels[k] ?? k, v])}
+            />
+          )}
           <div className="card">
             <h2>Карта кризиса</h2>
             <p><strong>{data.crisis.crisis_type_name}</strong> (уверенность: {(data.crisis.confidence * 100).toFixed(0)}%)</p>

@@ -16,15 +16,23 @@ async def register(data: UserCreate, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == data.email))
     if result.scalar_one_or_none():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email уже зарегистрирован")
-    user = User(
-        email=data.email,
-        hashed_password=get_password_hash(data.password),
-        full_name=data.full_name or "",
-    )
-    db.add(user)
-    await db.flush()
-    await db.refresh(user)
-    return user
+    try:
+        user = User(
+            email=data.email,
+            hashed_password=get_password_hash(data.password),
+            full_name=data.full_name or "",
+        )
+        db.add(user)
+        await db.flush()
+        await db.refresh(user)
+        await db.commit()
+        return user
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Ошибка сохранения: {str(e)}",
+        )
 
 
 @router.post("/login", response_model=Token)

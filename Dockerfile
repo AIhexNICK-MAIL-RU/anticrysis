@@ -46,6 +46,8 @@ RUN echo 'server { \
 RUN mkdir -p /app/backend/data
 ENV PYTHONUNBUFFERED=1
 ENV DATABASE_URL=sqlite+aiosqlite:///./data/anticrisis.db
+# В облаке фронт и API на одном домене — разрешаем любой origin, чтобы регистрация/вход работали
+ENV CORS_ORIGINS=*
 
 EXPOSE 80
 

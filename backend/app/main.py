@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import init_db
 from app.core.config import get_settings
-from app.api import auth, organizations, anticrisis
+from app.api import auth, organizations, anticrisis, calc
 from app.services.crisis_classifier import CRISIS_TYPES
 
 
@@ -18,6 +18,8 @@ settings = get_settings()
 origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
 if not origins:
     origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+# В облаке часто CORS_ORIGINS="*": разрешаем любой origin, без credentials (токен в заголовке)
+allow_wildcard = origins == ["*"] or (len(origins) == 1 and origins[0] == "*")
 
 app = FastAPI(
     title="Антикризисное управление",
@@ -27,7 +29,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    allow_credentials=not allow_wildcard,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -35,6 +37,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(organizations.router)
 app.include_router(anticrisis.router)
+app.include_router(calc.router)
 
 
 @app.get("/crisis-types")

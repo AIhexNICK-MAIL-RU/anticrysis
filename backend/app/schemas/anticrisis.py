@@ -70,14 +70,32 @@ class CrisisClassification(BaseModel):
     reasoning: str
 
 
+class FinModelResponse(BaseModel):
+    """Результаты финансовой модели (расчёты по балансу, БДР, БДДС)."""
+    total_assets: float
+    total_liabilities: float
+    equity_ratio: float
+    profit: float
+    profit_margin: float
+    gross_profit: float
+    gross_margin: float
+    break_even_revenue: float
+    operating_cash_flow: float
+    investing_cash_flow: float
+    financing_cash_flow: float
+    net_cash_flow: float
+    cash_end_calculated: float
+
+
 class PeriodTableResponse(BaseModel):
-    """Данные для расчётной таблицы по периоду: баланс, БДР, БДДС, коэффициенты, кризис."""
+    """Данные для расчётной таблицы по периоду: баланс, БДР, БДДС, коэффициенты, кризис, фин. модель."""
     period: PeriodResponse
     balance: dict  # ББЛ
     bdr: dict
     bdds: dict
     coefficients: CoefficientsResponse
     crisis: CrisisClassification
+    fin_model: FinModelResponse | None = None
 
 
 class PlanItemCreate(BaseModel):

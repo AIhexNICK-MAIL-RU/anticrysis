@@ -74,6 +74,7 @@ export const anticrisis = {
       bdds: Record<string, number>;
       coefficients: Record<string, number>;
       crisis: { crisis_type_code: string; crisis_type_name: string; confidence: number; reasoning: string };
+      fin_model?: Record<string, number>;
     }>(`/orgs/${orgId}/anticrisis/periods/${periodId}/table`),
   crisis: (orgId: number, periodId: number) =>
     api<{ crisis_type_code: string; crisis_type_name: string; confidence: number; reasoning: string }>(
@@ -93,4 +94,14 @@ export const anticrisis = {
     ),
   updatePlanItem: (orgId: number, planId: number, itemId: number, data: { completed?: boolean; status?: string }) =>
     api(`/orgs/${orgId}/anticrisis/plans/${planId}/items/${itemId}`, { method: 'PATCH', body: JSON.stringify(data) }),
+};
+
+export const calc = {
+  model: () =>
+    api<{ sheets: { name: string; visibility: string; file: string }[]; active_sheet: string; has_model: boolean }>('/calc/model'),
+  run: (inputs: Record<string, number>) =>
+    api<{ cells: Record<string, number | string | null>; metadata: { sheets: unknown[]; has_model: boolean } }>(
+      '/calc/run',
+      { method: 'POST', body: JSON.stringify({ inputs }) }
+    ),
 };

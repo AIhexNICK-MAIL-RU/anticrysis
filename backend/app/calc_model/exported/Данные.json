@@ -1,0 +1,37 @@
+{
+  "name": "Данные",
+  "visibility": "visible",
+  "dimensions": "B2:C5",
+  "cells": {
+    "B2": {
+      "value": 0,
+      "formula": null,
+      "data_type": "n"
+    },
+    "B3": {
+      "value": 0,
+      "formula": null,
+      "data_type": "n"
+    },
+    "B4": {
+      "value": "=B2-B3",
+      "formula": "=B2-B3",
+      "data_type": "f"
+    },
+    "C2": {
+      "value": 0,
+      "formula": null,
+      "data_type": "n"
+    },
+    "C3": {
+      "value": 0,
+      "formula": null,
+      "data_type": "n"
+    },
+    "C4": {
+      "value": "=C2-C3",
+      "formula": "=C2-C3",
+      "data_type": "f"
+    }
+  }
+}

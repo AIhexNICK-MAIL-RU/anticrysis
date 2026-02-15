@@ -4,6 +4,7 @@
 *.ppt
 *.xlsx
 *.xls
+excel_content/
 *.ipynb
 *.doc
 *.docx

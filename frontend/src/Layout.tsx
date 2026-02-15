@@ -11,6 +11,7 @@ export default function Layout() {
       <nav>
         <Link to="/">Дашборд</Link>
         <Link to="/orgs">Организации</Link>
+        <Link to="/calc">Расчётная модель</Link>
         <button type="button" onClick={handleLogout} className="btn btn-secondary" style={{ marginLeft: 'auto' }}>
           Выход
         </button>
