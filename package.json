@@ -5,7 +5,7 @@
   "workspaces": ["frontend"],
   "scripts": {
     "install:all": "npm install && pip install -r backend/requirements.txt || true",
-    "dev:frontend": "npm run dev -w anticrisis-frontend",
+    "dev:frontend": "cd frontend && npm run dev",
     "build:frontend": "npm run build -w anticrisis-frontend"
   }
 }

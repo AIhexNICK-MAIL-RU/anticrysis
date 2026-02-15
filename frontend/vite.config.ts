@@ -1,8 +1,17 @@
+import path from 'path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      recharts: path.resolve(process.cwd(), 'node_modules/recharts'),
+    },
+  },
+  optimizeDeps: {
+    include: ['recharts'],
+  },
   server: {
     port: 5173,
     proxy: {
