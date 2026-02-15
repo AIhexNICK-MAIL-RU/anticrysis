@@ -280,6 +280,18 @@ async def list_crisis_types():
 
 
 # --- Plans ---
+def _plan_to_response(plan: Plan, items: list) -> PlanResponse:
+    """Собираем ответ без обращения к relationship (избегаем greenlet в async)."""
+    return PlanResponse(
+        id=plan.id,
+        organization_id=plan.organization_id,
+        crisis_type_code=plan.crisis_type_code or "",
+        title=plan.title,
+        created_at=plan.created_at,
+        items=[PlanItemResponse.model_validate(i) for i in items],
+    )
+
+
 @router.post("/plans", response_model=PlanResponse)
 async def create_plan(
     org_id: int,
@@ -292,7 +304,7 @@ async def create_plan(
     plan = Plan(organization_id=org_id, crisis_type_code=data.crisis_type_code or "", title=data.title)
     db.add(plan)
     await db.flush()
-    for i, it in enumerate(data.items):
+    for i, it in enumerate(data.items or []):
         item = PlanItem(
             plan_id=plan.id,
             title=it.title,
@@ -303,10 +315,10 @@ async def create_plan(
             sort_order=i,
         )
         db.add(item)
-    await db.refresh(plan)
+    await db.flush()
     result = await db.execute(select(PlanItem).where(PlanItem.plan_id == plan.id).order_by(PlanItem.sort_order))
-    plan.items = list(result.scalars().all())
-    return plan
+    items = list(result.scalars().all())
+    return _plan_to_response(plan, items)
 
 
 @router.get("/plans", response_model=list[PlanResponse])
@@ -316,12 +328,12 @@ async def list_plans(
     membership: UserOrganization = Depends(get_organization_membership),
 ):
     result = await db.execute(select(Plan).where(Plan.organization_id == org_id).order_by(Plan.created_at.desc()))
-    plans = result.scalars().all()
+    plans = list(result.scalars().all())
     out = []
     for p in plans:
         r = await db.execute(select(PlanItem).where(PlanItem.plan_id == p.id).order_by(PlanItem.sort_order))
-        p.items = list(r.scalars().all())
-        out.append(p)
+        items = list(r.scalars().all())
+        out.append(_plan_to_response(p, items))
     return out
 
 
@@ -337,8 +349,8 @@ async def get_plan(
     if not plan:
         raise HTTPException(404, "План не найден")
     result = await db.execute(select(PlanItem).where(PlanItem.plan_id == plan.id).order_by(PlanItem.sort_order))
-    plan.items = list(result.scalars().all())
-    return plan
+    items = list(result.scalars().all())
+    return _plan_to_response(plan, items)
 
 
 @router.patch("/plans/{plan_id}/items/{item_id}")

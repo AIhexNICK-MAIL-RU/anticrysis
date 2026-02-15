@@ -74,29 +74,34 @@ docker compose up --build
 
 Данные БД сохраняются в volume `backend_data`.
 
-### Вариант B: Локально (единое окружение в корне)
+**Развёртывание в облаке:** в корне репозитория есть один **`Dockerfile`** (фронтенд + бэкенд + nginx в одном образе). Сборка: `docker build -t anticrisis .` Запуск: `docker run -p 80:80 -v anticrisis_data:/app/backend/data anticrisis`. Приложение доступно на порту 80, API — по пути `/api/`.
 
-После активации окружения одной командой (`source activate.sh`) и установки фронта (`npm install`):
+### Вариант B: Локально (с uv)
 
-**Бэкенд** (из корня):
-
-```bash
-./run-backend.sh
-```
-
-или с уже активированным `.venv`: `PYTHONPATH=backend uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`
-
-**Фронтенд** (из корня):
+#### 1. Бэкенд
 
 ```bash
-npm run dev:frontend
+cd backend
+uv venv --python 3.12
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+uv pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-или `./run-frontend.sh`
+Или из каталога `backend` без активации: `uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000`
 
-- API: http://127.0.0.1:8000  
-- Документация: http://127.0.0.1:8000/docs  
-- Фронтенд: http://localhost:5173  
+API: http://127.0.0.1:8000
+Документация: http://127.0.0.1:8000/docs
+
+### 2. Фронтенд
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Откройте http://localhost:5173
 
 Фронтенд ходит на бэкенд через прокси `/api` → `http://127.0.0.1:8000` (настроено в `frontend/vite.config.ts`).
 
@@ -142,8 +147,7 @@ git commit -m "Initial: веб-сервис антикризисное упра�
 git remote add origin https://github.com/AIhexNICK-MAIL-RU/anticrysis.git
 ```
 
-Если `origin` уже есть с другим URL — заменить:  
-`git remote set-url origin https://github.com/AIhexNICK-MAIL-RU/anticrysis.git`
+Если `origin` уже есть с другим URL — заменить:`git remote set-url origin https://github.com/AIhexNICK-MAIL-RU/anticrysis.git`
 
 3. Загрузить код в GitHub:
 
